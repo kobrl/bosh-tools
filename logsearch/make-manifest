@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+#VERSION=$(awk '/logsearch/{getline;print}' stub.yml | grep version | cut -d ':' -f2 | xargs)
+
+
+#cd ~/workspace/logsearch-boshrelease/
+#git checkout v$VERSION
+USAGE="Usage ./make-manifest <vsphere|warden> path/to/stub"
+
+if [[ $# -ne 2 ]]; then
+  echo "Illegal number of parameters"
+  echo $USAGE
+  exit
+fi
+
+
+~/workspace/logsearch-boshrelease/generate_deployment_manifest $1 $2 > /tmp/logsearch.yml
+bosh deployment /tmp/logsearch.yml

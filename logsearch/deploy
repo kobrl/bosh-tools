@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -e
+
+USAGE="Usage ./deploy <vsphere|warden> path/to/stub"
+
+if [[ $# -ne 2 ]]; then
+  echo "Illegal number of parameters"
+  echo $USAGE
+  exit
+fi
+
+RELEASE_NAME=logsearch
+VERSION=$(~/workspace/bosh-tools/get_version_number $2 $RELEASE_NAME)
+
+echo 'Clean up old manifest in tmp'
+rm -f /tmp/$RELEASE_NAME.yml
+
+echo "Make manifest for $RELEASE_NAME"
+
+ORIGINAL_PWD=$(pwd)
+cd ~/workspace/$RELEASE_NAME-boshrelease/
+git checkout develop
+cd $ORIGINAL_PWD
+
+~/workspace/bosh-tools/$RELEASE_NAME/make-manifest $1 $2
+
+echo "Checkout $RELEASE_NAME v$VERSION"
+cd ~/workspace/$RELEASE_NAME-boshrelease/
+git checkout v$VERSION
+
+echo 'Upload release'
+bosh upload release ~/workspace/$RELEASE_NAME-boshrelease/releases/$RELEASE_NAME-$VERSION.yml --skip-if-exists
+
+echo 'Perform deployment'
+bosh -n deploy
