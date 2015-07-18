@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -e
+
+USAGE="Usage ./make-manifest <warden> path/to/stub"
+
+if [[ $# -ne 2 ]]; then
+  echo "Illegal number of parameters"
+  echo $USAGE
+  exit
+fi
+
+
+RELEASE_NAME=cf
+RELEASE_DIR=~/workspace/$RELEASE_NAME-release
+VERSION=$(~/workspace/bosh-tools/get_version_number $2 $RELEASE_NAME)
+
+echo 'Clean up old manifest in tmp'
+rm -f /tmp/$RELEASE_NAME.yml
+
+ORIGINAL_PWD=$(pwd)
+cd $RELEASE_DIR
+git co v$VERSION
+cd $ORIGINAL_PWD
+
+$RELEASE_DIR/generate_deployment_manifest $1\
+  $RELEASE_DIR/templates/cf-minimal-dev.yml \
+  $2 > /tmp/cf.yml
+
+bosh deployment /tmp/cf.yml
+
