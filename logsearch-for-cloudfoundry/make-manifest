@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -e
+
+USAGE="Usage ./make-manifest <warden> path/to/stub"
+
+if [[ $# -ne 2 ]]; then
+  echo "Illegal number of parameters"
+  echo $USAGE
+  exit
+fi
+
+RELEASE_NAME=logsearch-for-cloudfoundry
+RELEASE_DIR=~/workspace/$RELEASE_NAME/$RELEASE_NAME-boshrelease
+VERSION=$(~/workspace/bosh-tools/get_version_number $2 $RELEASE_NAME)
+
+echo 'Clean up old manifest in tmp'
+rm -f /tmp/$RELEASE_NAME.yml
+
+ORIGINAL_PWD=$(pwd)
+cd $RELEASE_DIR
+
+if [  "$VERSION" != "latest" ]; then
+  git co v$VERSION
+else
+  git co master
+fi
+
+cd $ORIGINAL_PWD
+
+$RELEASE_DIR/templates/make_manifest $1 $2 
+
+
