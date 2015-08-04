@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-USAGE="Usage ./make-manifest <warden> path/to/stub"
+USAGE="Usage ./make-manifest <warden|vsphere> path/to/stub"
 
 if [[ $# -ne 2 ]]; then
   echo "Illegal number of parameters"
